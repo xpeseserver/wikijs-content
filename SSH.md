@@ -2,7 +2,7 @@
 title: SSH
 description: how the sshd_config should look like
 published: 1
-date: 2021-11-26T11:31:13.355Z
+date: 2021-11-26T12:21:24.972Z
 tags: ssh
 editor: markdown
 dateCreated: 2021-11-26T11:31:13.355Z
@@ -10,7 +10,7 @@ dateCreated: 2021-11-26T11:31:13.355Z
 
 # SSH
 ## Config location
-`nano /etc/ssh/sshd_config`
+`sudo nano /etc/ssh/sshd_config`
 
 ## Config data
 `#	$OpenBSD: sshd_config,v 1.104 2021/07/02 05:11:21 dtucker Exp $`
