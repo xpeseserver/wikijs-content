@@ -2,7 +2,7 @@
 title: SSH
 description: how the sshd_config should look like
 published: 1
-date: 2021-11-26T12:21:24.972Z
+date: 2021-11-26T12:39:42.821Z
 tags: ssh
 editor: markdown
 dateCreated: 2021-11-26T11:31:13.355Z
@@ -28,9 +28,11 @@ dateCreated: 2021-11-26T11:31:13.355Z
 `Include /etc/ssh/sshd_config.d/*.conf`
 
 `Port 22`
+`Protocol 2`
 
 `# Authentication:`
 
+`AuthorizedKeysFile .ssh/authorized_keys .ssh/authorized_keys2`
 `PermitRootLogin no`
 `MaxAuthTries 1`
 `MaxSessions 1`
