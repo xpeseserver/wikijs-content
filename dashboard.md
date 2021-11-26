@@ -2,13 +2,13 @@
 title: Landingpage
 description: Gameserver dashboard
 published: 1
-date: 2021-11-26T12:19:50.193Z
+date: 2021-11-26T12:19:57.759Z
 tags: php, web
 editor: markdown
 dateCreated: 2021-11-26T12:15:06.475Z
 ---
 
-# Header
+# Nginx
 ## User
 `www-data`
 ## scripts
