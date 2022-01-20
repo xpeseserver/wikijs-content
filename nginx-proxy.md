@@ -1,86 +1,117 @@
 ---
-title: Nginx-proxy
+title: Reverse Proxy
 description: SSL and subdomain ur containers
 published: 1
-date: 2022-01-17T08:27:34.036Z
+date: 2022-01-20T07:46:51.778Z
 tags: https, nginx, proxy, ssl, web
 editor: markdown
 dateCreated: 2022-01-15T12:26:20.341Z
 ---
 
-# Nginx-Proxy
-## docker-compose.yml
-https://gist.github.com/w33ble/ab51b77641e499968c354ca02e4bccf0
+# Caddy-Reverse-Proxy
 
-1. mkdir vhost
-2. curl -o templates/nginx.tmpl https://raw.githubusercontent.com/jwilder/nginx-proxy/master/nginx.tmpl
+This is a webserver written in GO. It automatically redirects HTTP to HTTPs and generates SSL-Certificates via Lets Encrypt.
+Also we use duckdns.org so we can create sub-sub-domains for our services.  
 
-```yaml:
-version: '3'
+## install
+```
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo tee /etc/apt/trusted.gpg.d/caddy-stable.asc
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
 
-services:
-  nginx-proxy:
-    image: nginx:alpine
-    container_name: proxy-nginx
-    environment:
-      - DEFAULT_HOST=xpese.spdns.de
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - conf:/etc/nginx/conf.d:ro
-      - ./vhost:/etc/nginx/vhost.d:ro
-      - html:/usr/share/nginx/html:ro
-      - certs:/etc/nginx/certs:ro
+## apply changes
+`sudo systemctl restart caddy`
 
-  dockergen:
-    image: jwilder/docker-gen
-    container_name: proxy-dockergen
-    command: -notify-sighup proxy-nginx -wait 5s:30s -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./templates:/etc/docker-gen/templates:rw
-      - conf:/etc/nginx/conf.d
-      - ./vhost:/etc/nginx/vhost.d:ro
-      - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs:ro
-    environment:
-      - DEFAULT_HOST=xpese.spdns.de
+## Config file
+/etc/caddy/Caddyfile
+```
+{
+    http_port 80
+    https_port 443
 
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    container_name: proxy-letsencrypt
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./templates:/etc/docker-gen/templates:ro
-      - conf:/etc/nginx/conf.d
-      - ./vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs
-    environment:
-      - DEFAULT_EMAIL=xpeseserver@gmail.com
-      - NGINX_PROXY_CONTAINER=proxy-nginx
-      - NGINX_DOCKER_GEN_CONTAINER=proxy-dockergen
+    email xpeseserver@gmail.com
 
-networks:
-  default:
-    external:
-      name: nginx-proxy
+}
+xpese.spdns.de {
+    redir https://xpese.duckdns.org{uri}
+}
+xpese.duckdns.org {
+    reverse_proxy localhost:3002
+    log {
+        output file /var/log/caddy/index.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+}
 
-volumes:
-  conf:
-  certs:
-  html:
-  ```
-  ## Container config
-  ```yaml:
-      environment:
-      - VIRTUAL_PORT=PORT-USED
-      - VIRTUAL_HOST=WHAT.xpese.spdns.de
+dash.xpese.duckdns.org {
+    root * /var/www/dash
+    file_server /static/*
+    log {
+        output file /var/log/caddy/dash.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+    php_fastcgi unix//run/php/php7.4-fpm.sock
 
-# in order for the proxy to see this service, it needs to be on the same network
-networks:
-  default:
-    external:
-      name: nginx-proxy
-  ```
+}
+wiki.xpese.duckdns.org {
+    reverse_proxy localhost:3000
+    log {
+        output file /var/log/caddy/wiki.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+}
+up.xpese.duckdns.org {
+    reverse_proxy localhost:3001
+    log {
+        output file /var/log/caddy/up.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+}
+file.xpese.duckdns.org {
+    reverse_proxy localhost:8080
+    log {
+        output file /var/log/caddy/file.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+}
+sinus.xpese.duckdns.org {
+    reverse_proxy localhost:8087
+    log {
+        output file /var/log/caddy/sinus.access.log {
+                roll_size 3MiB
+                roll_keep 5
+                roll_keep_for 48h
+        }
+        format console
+    }
+    encode gzip zstd
+}
+```
