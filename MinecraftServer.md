@@ -2,7 +2,7 @@
 title: Minecraft Server
 description: handle minecraf tservers
 published: 1
-date: 2022-05-15T19:24:39.090Z
+date: 2022-05-15T19:26:19.192Z
 tags: minecraft
 editor: markdown
 dateCreated: 2021-11-18T17:30:37.288Z
@@ -17,10 +17,10 @@ dateCreated: 2021-11-18T17:30:37.288Z
 3. unzip `<filename>`
 4. cp `<filename>` serverfiles
 5. chmod -R `<username>`:`<group>` serverfiles
-6. chmod +x tartserver.sh
-7. cd ./serverfiles/
+6. cd ./serverfiles/
+7. chmod +x startserver.sh
 8. ./startserver.sh #quit when running
-9. mv `serverstarter-x.x.x.jar` minecraft_server,jar
+9. mv `serverstarter-x.x.x.jar` minecraft_server.jar
 
 ### post-installation
 
